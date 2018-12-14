@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chq.o2o.dao.ProductCategoryDao">
+	<select id="queryProductCategoryList" parameterType="Long"
+		resultType="com.chq.o2o.entity.ProductCategory">
+		SELECT
+		product_category_id,
+		shop_id,
+		product_category_name,
+		priority,
+		create_time
+		FROM
+		tb_product_category
+		WHERE
+		shop_id = #{shopId}
+		ORDER BY
+		priority DESC
+	</select>
+
+	<insert id="batchInsertProductCategory" parameterType="java.util.List">
+		INSERT INTO
+		tb_product_category(product_category_name,priority,create_time,shop_id)
+		VALUES
+		<!-- 遍历传入的list对象，每次遍历到的元素命名为productCategory，collection配置的是传递进来的参数名称 -->
+		<foreach collection="productCategoryList" item="productCategory"
+			index="index" separator=",">
+			(
+			#{productCategory.productCategoryName},
+			#{productCategory.priority},
+			#{productCategory.createTime},
+			#{productCategory.shopId}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteProductCategory">
+		DELETE FROM
+		tb_product_category
+		WHERE
+		product_category_id = #{productCategoryId}
+		AND shop_id = #{shopId}
+	</delete>
+</mapper>

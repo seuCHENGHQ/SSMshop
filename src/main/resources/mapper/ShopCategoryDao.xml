@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chq.o2o.dao.ShopCategoryDao">
+	<select id="queryShopCategory" resultType="com.chq.o2o.entity.ShopCategory">
+		SELECT
+		shop_category_id,
+		shop_category_name,
+		shop_category_desc,
+		shop_category_img,
+		priority,
+		create_time,
+		last_edit_time,
+		parent_id
+		FROM
+		tb_shop_category
+		<where>
+			<!-- 在整个项目的首页，我们希望在首页显示所有的商品大类，以便用户进行进一步的选择，因此需要一个能返回一级列别的条件 -->
+			<if test="shopCategoryCondition == null">
+				AND parent_id IS NULL
+			</if>
+			<!-- 在店铺注册时，我们希望用户只选择二级或者更细化的店铺类别，而不希望直接选择大类，因此在下拉菜单中只显示二级的店铺类别，一级店铺类别的parentId为null，因此在这里是不显示的 -->
+			<if test="shopCategoryCondition != null">
+				AND parent_id IS NOT NULL
+			</if>
+			<if test="shopCategoryCondition != null and shopCategoryCondition.parent != null">
+				<!-- 查找出同属于一个父类id的所有shopCategory子类 -->
+				AND parent_id = #{shopCategoryCondition.parent.shopCategoryId}
+			</if>
+		</where>
+		ORDER BY
+		priority DESC
+	</select>	
+</mapper>

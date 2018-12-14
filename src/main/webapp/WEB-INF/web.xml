@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+	<display-name>Archetype Created Web Application</display-name>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	
+	
+	<!-- 由这里可以知道，contextConfigLocation可以在两个地方设置，一个是外部，一个是servlet内，在外部设置是全局性的，内部是局部性的 -->
+	<!-- 存在两个contextConfigLocation，一个是给ContextLoadrListener，一个是给DispatcherServlet。
+		都是用于加载上下文，一个是spring的，一个是springMVC的，其中ContextLoadrListener先加载，然后才是DispatcherServlet。
+
+		2.1 区别：
+		DispatcherServlet一般会加载MVC相关的bean配置管理(如: ViewResolver, Controller, MultipartResolver, ExceptionHandler, etc.)
+		ContextLoaderListener一般会加载整个Spring容器相关的bean配置管理(如: Log, Service, Dao, PropertiesLoader, etc.)
+
+		2.2 注意点：
+		也就是如果我把@Controller的注解放到ContextLoadrListener中的配置文件去加载是不可以的，DispatcherServlet到时对这个controller会无感知。
+		DispatcherServlet的上下文仅仅是Spring MVC的上下文, 而ContextLoaderListener的上下文则对整个Spring都有效. 也就是DispatcherServlet可以使用spring的上下文，
+		但是spring不能使用DispatcherServlet的上下文。一般Spring web项目中同时会使用这两种上下文 -->
+	<!-- 
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring/spring-*.xml</param-value>
+	</context-param>
+	 -->
+	
+	
+	<servlet>
+		<servlet-name>spring-dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<!-- 如果不配置这个参数，那么Spring会默认的寻找/WEB-INF/applicationContext.xml文件，来加载其中的bean到Spring IoC容器中，约定大于配置！ -->
+			<param-name>contextConfigLocation</param-name>
+			<!-- 正是因为这里将所有的spring配置文件都整合到了一起，将其中定义的bean都读到了Spring IoC容器中，
+				 spring-service才能读到spring-dao中定义的dataSource这个bean -->
+			<param-value>classpath:spring/spring-*.xml</param-value>
+		</init-param>
+	</servlet>
+	<!-- 验证码的servlet 本地无法生成验证码，因此使用谷歌的验证码服务 -->
+	<servlet>
+		<servlet-name>Kaptcha</servlet-name>
+		<servlet-class>com.google.code.kaptcha.servlet.KaptchaServlet</servlet-class>
+		<!-- 是否有边框 -->
+		<init-param>
+			<param-name>kaptcha.border</param-name>
+			<param-value>no</param-value>
+		</init-param>
+		<!-- 字体颜色 -->
+		<init-param>
+			<param-name>kaptcha.textproducer.font.color</param-name>
+			<param-value>red</param-value>
+		</init-param>
+		<!-- 字体大小 -->
+		<init-param>
+			<param-name>kaptcha.textproducer.font.size</param-name>
+			<param-value>43</param-value>
+		</init-param>
+		<!-- 图片宽度 -->
+		<init-param>
+			<param-name>kaptcha.image.width</param-name>
+			<param-value>135</param-value>
+		</init-param>
+		<!-- 图片高度 -->
+		<init-param>
+			<param-name>kaptcha.image.height</param-name>
+			<param-value>50</param-value>
+		</init-param>
+		<!-- 使用哪些字符生成验证码 -->
+		<init-param>
+			<param-name>kaptcha.textproducer.char.string</param-name>
+			<param-value>ACDEFHKPRSTW345679</param-value>
+		</init-param>
+		<!-- 干扰线的颜色 -->
+		<init-param>
+			<param-name>kaptcha.noise.color</param-name>
+			<param-value>black</param-value>
+		</init-param>
+		<!-- 字符个数 -->
+		<init-param>
+			<param-name>kaptcha.textproducer.char.length</param-name>
+			<param-value>4</param-value>
+		</init-param>
+		<!-- 字体 -->
+		<init-param>
+			<param-name>kaptcha.textproducer.font.names</param-name>
+			<param-value>Arial</param-value>
+		</init-param>
+	</servlet>
+	
+	<!-- 设置哪个servlet会哪种url请求做出反应 -->
+	<servlet-mapping>
+		<servlet-name>spring-dispatcher</servlet-name>
+		<!-- 默认匹配所有的请求，也可以这里也可以写*.do，这样就会对xxx.do请求做出反应 -->
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Kaptcha</servlet-name>
+		<url-pattern>/Kaptcha</url-pattern>
+	</servlet-mapping>
+</web-app>
